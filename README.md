@@ -38,7 +38,7 @@ docker-symfony-template/
 1. **Cloner ce template dans le dossier du futur projet**
 
    ```sh
-   git clone https://github.com/votre-repo/docker-symfony-template.git template
+   git clone https://github.com/JeanBernardMagnien/Symfony-Docker-Template template
    cd template
    ```
 
