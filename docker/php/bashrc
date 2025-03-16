@@ -1,0 +1,14 @@
+# Activer les couleurs dans le terminal
+export TERM=xterm-256color
+
+# Définir un prompt plus lisible
+PS1='\[\033[01;34m\]\u@\h:\[\033[01;32m\]\w\[\033[00m\]\$ '
+
+# Activer l'autocomplétion et la coloration de ls
+alias ll='ls --color=auto -lah'
+alias grep='grep --color=auto'
+
+# Améliorer l'affichage de l'historique
+HISTCONTROL=ignoreboth
+HISTSIZE=1000
+HISTFILESIZE=2000

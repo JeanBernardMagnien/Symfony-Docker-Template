@@ -1,0 +1,50 @@
+USER_ID=$(shell id -u)
+GROUP_ID=$(shell id -g)
+PROJECT=$(shell basename $(PWD))
+
+up:
+	@echo "🚀 Démarrage de l'environnement Docker... dans ${PROJECT}"
+	@export USER_ID=$(USER_ID) && export GROUP_ID=$(GROUP_ID) && export PROJECT_NAME=${PROJECT} && \
+	docker compose build --build-arg USER_ID=$(USER_ID) --build-arg GROUP_ID=$(GROUP_ID) --build-arg PROJECT_NAME=${PROJECT} && \
+	docker compose --project-name ${PROJECT} up -d
+
+down:
+	@echo "🛑 Arrêt de l'environnement Docker... dans ${PROJECT}"
+	@export USER_ID=$(USER_ID) && export GROUP_ID=$(GROUP_ID) && export PROJECT_NAME=${PROJECT} && \
+	docker compose --project-name ${PROJECT} down
+
+clean:
+	@echo "🧹 Suppression complète de l'environnement Docker (⚠ Cela supprime les volumes !)"
+	@export USER_ID=$(USER_ID) && export GROUP_ID=$(GROUP_ID) && export PROJECT_NAME=${PROJECT} && \
+	docker compose --project-name ${PROJECT} down --volumes
+	@docker volume prune -f
+	@docker image prune -f
+
+restart: down up
+
+logs:
+	@docker compose logs -f
+    
+shell:
+	@docker exec -it ${PROJECT}_php bash
+
+composer:
+	@docker exec -it ${PROJECT}_php composer
+
+dbshell:
+	@docker exec -it ${PROJECT}_db mysql -u root
+
+console:
+	@docker exec -it ${PROJECT}_php php bin/console
+
+db-migrations:
+	@docker exec -it ${PROJECT}_php php bin/console make:migrations
+
+db-migrate:
+	@docker exec -it ${PROJECT}_php php bin/console doctrine:migrations:migrate --no-interaction
+
+db-fixtures:
+	@docker exec -it ${PROJECT}_php php bin/console doctrine:fixtures:load --no-interaction
+
+cache-clear:
+	@docker exec -it ${PROJECT}_php php bin/console cache:clear
