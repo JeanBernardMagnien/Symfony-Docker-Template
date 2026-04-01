@@ -1,6 +1,7 @@
 USER_ID=$(shell id -u)
 GROUP_ID=$(shell id -g)
 name?=my_project
+name_container=$(shell echo $(name) | tr '[:upper:]' '[:lower:]')
 symfony?=7.2.x
 
 install:
@@ -20,7 +21,7 @@ install:
 	@rm -f "../$(name)/compose.yaml"
 		
 	@echo "🔹 Création du fichier .env.local pour la connexion à la BDD..."
-	@echo "DATABASE_URL=mysql://root@database:3306/${name}" > "../$(name)/.env.local"
+	@echo "DATABASE_URL=mysql://root@database:3307/${name}" > "../$(name)/.env.local"
 
 	@echo "🔹 Copie des fichiers Docker et Makefile..."
 	@cp -r "$(PWD)/docker" "../$(name)/"
@@ -28,7 +29,7 @@ install:
 	@cp "$(PWD)/Makefile.project" "../$(name)/Makefile"
 
 	@echo "🔹 Génération de la configuration Nginx..."
-	@export PROJECT_NAME=$(name) && envsubst '$$PROJECT_NAME' < "$(PWD)/docker/nginx/default.conf.template" > "../$(name)/docker/nginx/default.conf"
+	@export PROJECT_NAME=$(name_container) && envsubst '$$PROJECT_NAME' < "$(PWD)/docker/nginx/default.conf.template" > "../$(name)/docker/nginx/default.conf"
 	@rm -f "../$(name)/docker/nginx/default.conf.template"
 
 	@echo "🔹 Attribution des permissions..."

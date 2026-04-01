@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     curl \
-    && docker-php-ext-install pdo pdo_mysql opcache \
+    && docker-php-ext-install pdo pdo_mysql \
     && pecl install redis \
     && docker-php-ext-enable redis
 

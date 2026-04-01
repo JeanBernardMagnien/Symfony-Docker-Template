@@ -65,6 +65,7 @@ docker-symfony-template/
 4. **Accéder à l'application**
 
    - Symfony sera accessible sur : [http://localhost:8080](http://localhost:8080)
+   - BDD : DATABASE_URL=mysql://root@database:3307/${new_project}"
 
 ## 🛠️ Commandes utiles
 
