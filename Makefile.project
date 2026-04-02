@@ -1,43 +1,78 @@
 USER_ID=$(shell id -u)
 GROUP_ID=$(shell id -g)
-# forcer le nom en minuscule pour le compose
 PROJECT=$(shell basename $(PWD) | tr '[:upper:]' '[:lower:]')
+
+# Lecture des ports depuis .env.local
+NGINX_PORT=$(shell grep '^NGINX_PORT=' .env.local | cut -d '=' -f2)
+DB_PORT=$(shell grep '^DB_PORT=' .env.local    | cut -d '=' -f2)
 
 up:
 	@echo "🚀 Démarrage de l'environnement Docker... dans ${PROJECT}"
-	@export USER_ID=$(USER_ID) && export GROUP_ID=$(GROUP_ID) && export PROJECT_NAME=${PROJECT} && \
+	@export USER_ID=$(USER_ID) GROUP_ID=$(GROUP_ID) PROJECT_NAME=${PROJECT} \
+	       NGINX_PORT=$(NGINX_PORT) DB_PORT=$(DB_PORT) && \
 	docker compose build --build-arg USER_ID=$(USER_ID) --build-arg GROUP_ID=$(GROUP_ID) --build-arg PROJECT_NAME=${PROJECT} && \
 	docker compose --project-name ${PROJECT} up -d
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "  🗄️  MySQL  → localhost:$(DB_PORT)"
+	@echo "  🌐 App    → http://localhost:$(NGINX_PORT)"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 down:
 	@echo "🛑 Arrêt de l'environnement Docker... dans ${PROJECT}"
-	@export USER_ID=$(USER_ID) && export GROUP_ID=$(GROUP_ID) && export PROJECT_NAME=${PROJECT} && \
+	@export USER_ID=$(USER_ID) GROUP_ID=$(GROUP_ID) PROJECT_NAME=${PROJECT} \
+	       NGINX_PORT=$(NGINX_PORT) DB_PORT=$(DB_PORT) && \
 	docker compose --project-name ${PROJECT} down
+
+stop:
+	@echo "⏸️  Arrêt des containers... dans ${PROJECT}"
+	@export USER_ID=$(USER_ID) GROUP_ID=$(GROUP_ID) PROJECT_NAME=${PROJECT} \
+	       NGINX_PORT=$(NGINX_PORT) DB_PORT=$(DB_PORT) && \
+	docker compose --project-name ${PROJECT} stop
+
+start:
+	@echo "▶️  Démarrage des containers... dans ${PROJECT}"
+	@export USER_ID=$(USER_ID) GROUP_ID=$(GROUP_ID) PROJECT_NAME=${PROJECT} \
+	       NGINX_PORT=$(NGINX_PORT) DB_PORT=$(DB_PORT) && \
+	docker compose --project-name ${PROJECT} start
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "  🗄️  MySQL  → localhost:$(DB_PORT)"
+	@echo "  🌐 App    → http://localhost:$(NGINX_PORT)"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 clean:
 	@echo "🧹 Suppression complète de l'environnement Docker (⚠ Cela supprime les volumes !)"
-	@export USER_ID=$(USER_ID) && export GROUP_ID=$(GROUP_ID) && export PROJECT_NAME=${PROJECT} && \
+	@export USER_ID=$(USER_ID) GROUP_ID=$(GROUP_ID) PROJECT_NAME=${PROJECT} \
+	       NGINX_PORT=$(NGINX_PORT) DB_PORT=$(DB_PORT) && \
 	docker compose --project-name ${PROJECT} down --volumes
 	@docker volume prune -f
 	@docker image prune -f
 
-restart: down up
+restart: stop start
+
+remake: down up
 
 logs:
-	@export USER_ID=$(USER_ID) && export GROUP_ID=$(GROUP_ID) && export PROJECT_NAME=${PROJECT} && \
+	@export USER_ID=$(USER_ID) GROUP_ID=$(GROUP_ID) PROJECT_NAME=${PROJECT} \
+	       NGINX_PORT=$(NGINX_PORT) DB_PORT=$(DB_PORT) && \
 	docker compose logs -f
-    
+
 shell:
 	@docker exec -it ${PROJECT}_php bash
 
 composer:
-	@docker exec -it ${PROJECT}_php composer
+	@docker exec -it ${PROJECT}_php composer $(cmd)
 
 dbshell:
 	@docker exec -it ${PROJECT}_db mysql -u root
 
+.PHONY: console
 console:
-	@docker exec -it ${PROJECT}_php php bin/console
+    @docker exec -it ${PROJECT}_php php bin/console $(filter-out console,$(MAKECMDGOALS))
+
+%:
+    @:
 
 db-migrations:
 	@docker exec -it ${PROJECT}_php php bin/console make:migrations
@@ -50,3 +85,11 @@ db-fixtures:
 
 cache-clear:
 	@docker exec -it ${PROJECT}_php php bin/console cache:clear
+
+info:
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "  📁 Projet   → ${PROJECT}"
+	@echo "  🗄️  MySQL    → localhost:$(DB_PORT)"
+	@echo "  🌐 App      → http://localhost:$(NGINX_PORT)"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

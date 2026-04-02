@@ -19,9 +19,16 @@ install:
 
 	@echo "🔹 Suppression du fichier compose.yaml généré automatiquement par Symfony..."
 	@rm -f "../$(name)/compose.yaml"
-		
+
+	@echo "🔹 Calcul des ports uniques pour ce projet..."
+	$(eval NGINX_PORT := $(shell echo "$(name_container)_nginx" | cksum | awk '{print 8000 + ($$1 % 1000)}'))
+	$(eval DB_PORT    := $(shell echo "$(name_container)_db"    | cksum | awk '{print 3300 + ($$1 % 100)}'))
+
 	@echo "🔹 Création du fichier .env.local pour la connexion à la BDD..."
-	@echo "DATABASE_URL=mysql://root@database:3307/${name}" > "../$(name)/.env.local"
+	@echo "DATABASE_URL=mysql://root@database:3306/$(name_container)?serverVersion=8.0&charset=utf8mb4" > "../$(name)/.env.local"
+	@echo "PROJECT_NAME=$(name_container)" >> "../$(name)/.env.local"
+	@echo "NGINX_PORT=$(NGINX_PORT)" >> "../$(name)/.env.local"
+	@echo "DB_PORT=$(DB_PORT)"       >> "../$(name)/.env.local"
 
 	@echo "🔹 Copie des fichiers Docker et Makefile..."
 	@cp -r "$(PWD)/docker" "../$(name)/"
@@ -36,5 +43,11 @@ install:
 	@sudo chown -R $(USER_ID):$(GROUP_ID) "../$(name)"
 	@sudo chmod -R 755 "../$(name)"
 
+	@echo ""
 	@echo "✅ Installation terminée !"
-	@echo "➡️  Pour démarrer l'environnement Docker: cd ../$(name) && make up"   
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "  📁 Projet   → ../$(name)"
+	@echo "  🌐 App      → http://localhost:$(NGINX_PORT)"
+	@echo "  🗄️  MySQL    → localhost:$(DB_PORT)"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "➡️  Pour démarrer : cd ../$(name) && make up"

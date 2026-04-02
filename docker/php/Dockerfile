@@ -16,10 +16,11 @@ RUN echo "Building with USER_ID=${USER_ID}, GROUP_ID=${GROUP_ID}, PROJECT_NAME=$
 
 RUN apt-get update && apt-get install -y \
     libpq-dev \
+    libicu-dev \ 
     unzip \
     git \
     curl \
-    && docker-php-ext-install pdo pdo_mysql \
+    && docker-php-ext-install pdo pdo_mysql intl \
     && pecl install redis \
     && docker-php-ext-enable redis
 
