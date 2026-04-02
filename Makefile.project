@@ -61,18 +61,15 @@ logs:
 shell:
 	@docker exec -it ${PROJECT}_php bash
 
-composer:
-	@docker exec -it ${PROJECT}_php composer $(cmd)
-
 dbshell:
 	@docker exec -it ${PROJECT}_db mysql -u root
 
 .PHONY: console
 console:
-    @docker exec -it ${PROJECT}_php php bin/console $(filter-out console,$(MAKECMDGOALS))
+	@docker exec -it ${PROJECT}_php php bin/console $(filter-out console,$(MAKECMDGOALS))
 
 %:
-    @:
+	@:
 
 db-migrations:
 	@docker exec -it ${PROJECT}_php php bin/console make:migrations

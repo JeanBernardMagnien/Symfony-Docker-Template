@@ -47,7 +47,7 @@ install:
 	@echo "✅ Installation terminée !"
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	@echo "  📁 Projet   → ../$(name)"
-	@echo "  🌐 App      → http://localhost:$(NGINX_PORT)"
 	@echo "  🗄️  MySQL    → localhost:$(DB_PORT)"
+	@echo "  🌐 App      → http://localhost:$(NGINX_PORT)"
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	@echo "➡️  Pour démarrer : cd ../$(name) && make up"
